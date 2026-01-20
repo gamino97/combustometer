@@ -4,5 +4,7 @@
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
   },
-  "standard.autoFixOnSave": true
+  "[javascript]": {
+    "editor.formatOnSave": false
+  }
 }

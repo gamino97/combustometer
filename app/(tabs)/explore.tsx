@@ -114,8 +114,8 @@ export default function TabTwoScreen(): React.ReactElement {
 
 const styles = StyleSheet.create({
   headerImage: {
-    color: "#808080",
     bottom: -90,
+    color: "#808080",
     left: -35,
     position: "absolute",
   },

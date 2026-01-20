@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
 import {
   FlatList,
@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { db } from "@/db";
-import { vehicles, logs } from "@/db/schema";
+import { logs, vehicles } from "@/db/schema";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 interface Vehicle {
@@ -332,20 +332,113 @@ export default function HomeScreen(): React.ReactElement {
 }
 
 const styles = StyleSheet.create({
+  actionsRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 16,
+    marginTop: 24,
+    zIndex: 10,
+  },
+  arrowButton: {
+    alignItems: "center",
+    borderRadius: 8,
+    borderWidth: 1,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+  arrowButtonDark: {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  arrowButtonLight: {
+    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    borderColor: "rgba(0, 0, 0, 0.1)",
+  },
+  card: {
+    borderRadius: 16,
+    borderWidth: 1,
+    elevation: 2,
+    marginBottom: 20,
+    marginHorizontal: 24,
+    overflow: "hidden",
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  cardDark: {
+    backgroundColor: "#232E2F",
+    borderColor: "rgba(255, 255, 255, 0.05)",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    zIndex: 10,
+  },
+  cardInfo: {
+    flex: 1,
+  },
+  cardLight: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#e2e8f0",
+  },
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
+  contentContainer: {
+    paddingVertical: 24,
+  },
+  efficiencyContainer: {
+    alignItems: "flex-end",
+  },
+  efficiencyUnit: {
+    color: "#8dc9ce",
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+  efficiencyValue: {
+    fontSize: 24,
+    fontWeight: "800",
+  },
+  fab: {
     alignItems: "center",
+    borderRadius: 16,
+    elevation: 8,
+    height: 64,
+    justifyContent: "center",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    width: 64,
+  },
+  fabContainer: {
+    bottom: 24,
+    position: "absolute",
+    right: 24,
+    zIndex: 50,
+  },
+  header: {
+    alignItems: "center",
+    borderBottomWidth: 1,
+    flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 24,
     paddingVertical: 16,
-    borderBottomWidth: 1,
   },
   headerDark: {
     backgroundColor: "rgba(21, 30, 31, 0.95)",
     borderBottomColor: "rgba(255, 255, 255, 0.05)",
+  },
+  headerIcons: {
+    flexDirection: "row",
+    gap: 16,
   },
   headerLight: {
     backgroundColor: "rgba(249, 250, 250, 0.95)",
@@ -356,16 +449,12 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: -0.5,
   },
-  headerIcons: {
-    flexDirection: "row",
-    gap: 16,
-  },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
     alignItems: "center",
+    borderRadius: 20,
+    height: 40,
     justifyContent: "center",
+    width: 40,
   },
   iconButtonDark: {
     backgroundColor: "rgba(255, 255, 255, 0.05)",
@@ -373,21 +462,43 @@ const styles = StyleSheet.create({
   iconButtonLight: {
     backgroundColor: "#f1f5f9",
   },
-  contentContainer: {
-    paddingVertical: 24,
+  lastUpdatedText: {
+    color: "#8dc9ce",
+    fontSize: 12,
+    fontWeight: "500",
   },
-  statsScroll: {
-    paddingLeft: 24,
+  listContent: {
+    paddingBottom: 100, // Space for FAB
+    gap: 20,
   },
-  statsScrollContent: {
-    gap: 16,
-    paddingRight: 24,
+  logButton: {
+    alignItems: "center",
+    borderRadius: 8,
+    flex: 1,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    paddingVertical: 12,
+  },
+  logButtonText: {
+    color: "#FFF",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  odometerText: {
+    color: "#8dc9ce",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  rowCenter: {
+    alignItems: "flex-start",
+    flexDirection: "row",
   },
   statCard: {
-    minWidth: 140,
-    padding: 12,
     borderRadius: 12,
     borderWidth: 1,
+    minWidth: 140,
+    padding: 12,
   },
   statCardPrimary: {
     backgroundColor: "rgba(0, 108, 117, 0.1)",
@@ -404,154 +515,43 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 10,
     fontWeight: "700",
-    textTransform: "uppercase",
-    marginBottom: 4,
     letterSpacing: 0.5,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: "800",
+    marginBottom: 4,
+    textTransform: "uppercase",
   },
   statUnit: {
     fontSize: 12,
     fontWeight: "400",
   },
-  rowCenter: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+  statValue: {
+    fontSize: 20,
+    fontWeight: "800",
   },
-  listContent: {
-    paddingBottom: 100, // Space for FAB
-    gap: 20,
+  statsScroll: {
+    paddingLeft: 24,
   },
-  card: {
-    marginHorizontal: 24,
-    marginBottom: 20,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  cardDark: {
-    backgroundColor: "#232E2F",
-    borderColor: "rgba(255, 255, 255, 0.05)",
-  },
-  cardLight: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#e2e8f0",
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    zIndex: 10,
-  },
-  cardInfo: {
-    flex: 1,
-  },
-  statusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 8,
+  statsScrollContent: {
+    gap: 16,
+    paddingRight: 24,
   },
   statusBadge: {
+    borderRadius: 4,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 4,
+  },
+  statusRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 8,
   },
   statusText: {
     fontSize: 10,
     fontWeight: "700",
   },
-  lastUpdatedText: {
-    fontSize: 12,
-    color: "#8dc9ce",
-    fontWeight: "500",
-  },
   vehicleName: {
     fontSize: 24,
     fontWeight: "800",
     marginBottom: 4,
-  },
-  odometerText: {
-    fontSize: 14,
-    color: "#8dc9ce",
-    fontWeight: "500",
-  },
-  efficiencyContainer: {
-    alignItems: "flex-end",
-  },
-  efficiencyValue: {
-    fontSize: 24,
-    fontWeight: "800",
-  },
-  efficiencyUnit: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "#8dc9ce",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  actionsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    marginTop: 24,
-    zIndex: 10,
-  },
-  logButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  logButtonText: {
-    color: "#FFF",
-    fontWeight: "700",
-    fontSize: 14,
-  },
-  arrowButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  arrowButtonDark: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderColor: "rgba(255, 255, 255, 0.1)",
-  },
-  arrowButtonLight: {
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
-    borderColor: "rgba(0, 0, 0, 0.1)",
-  },
-  fabContainer: {
-    position: "absolute",
-    bottom: 24,
-    right: 24,
-    zIndex: 50,
-  },
-  fab: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
   },
 });
