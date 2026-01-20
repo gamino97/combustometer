@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons'
-import { Image } from 'expo-image'
 import { StatusBar } from 'expo-status-bar'
-import React from 'react'
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite'
+import React, { useMemo } from 'react'
 import {
   FlatList,
   ScrollView,
@@ -13,78 +13,23 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { ThemedText } from '@/components/themed-text'
 import { Colors } from '@/constants/theme'
+import { db } from '@/db'
+import { vehicles, logs } from '@/db/schema'
 import { useColorScheme } from '@/hooks/use-color-scheme'
 
 interface Vehicle {
-  id: string
+  id: number
   name: string
   status: string
-  statusColor: string // Hex or theme key
+  statusColor: string
   statusTextColor: string
   lastUpdated: string
   distance: string
   efficiency: string
   efficiencyUnit: string
   efficiencyColor: string
-  bgImage: string
   type: 'gas' | 'electric'
-  logLabel: string
-  logIcon: keyof typeof MaterialIcons.glyphMap
 }
-
-const VEHICLES: Vehicle[] = [
-  {
-    id: '1',
-    name: 'Mazda 3',
-    status: 'ACTIVE',
-    statusColor: '#006c75', // primary
-    statusTextColor: '#FFFFFF',
-    lastUpdated: 'Last refueled 2 days ago',
-    distance: '42,500 km',
-    efficiency: '12.5',
-    efficiencyUnit: 'KM/L AVG',
-    efficiencyColor: '#FF7F11', // accent-orange
-    bgImage:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDSBF2pKWu-BM6f3FgAoVqmt6RZaNAfXFOhMC3pR7gQCKuYo_kyR9eXUmQwUn-FESvWLzwieeQpTr9BRZUAMAxMY3Mcx6SfgGPP_ewOxi8OhIQTwuA2GZ8xAIkiXVBH4RCzoWl8Vn2mOtWd7QkfWRa6nnDEcHiSteWxmlovbABRE-2v6IZuCldm-gWRS3zuPgBGLeaWIX67APUA0QSu7Sl_nIoHsfTMkKS4IGRhOr-nZKQlAji0Tyc-_kb9jqwQqudc6A9ZQnbNEmo',
-    type: 'gas',
-    logLabel: 'Log Fuel',
-    logIcon: 'local-gas-station'
-  },
-  {
-    id: '2',
-    name: 'VW Golf',
-    status: 'IDLE',
-    statusColor: 'rgba(255, 255, 255, 0.1)',
-    statusTextColor: '#8dc9ce',
-    lastUpdated: 'Last refueled 1 week ago',
-    distance: '18,210 km',
-    efficiency: '15.2',
-    efficiencyUnit: 'KM/L AVG',
-    efficiencyColor: '#FF7F11',
-    bgImage:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDmrA0AKsSMRz6D-Q-W7gzIb2Vmv-vFpKeY4Qf5XBu0qfFB5-loOqHkpPKJQ4QBkmrFnGPMyjJbUe5PffNbPa2lr7alVIopnDkj_9AZPdf6OesQ45sC_tVc7JmaDHo10JUoQsK7cZ7mOYwVvmFwlMCGI-9aob36FHXU3kRzK9uZp-e-A41KOSBSqpLyBjCn56nUzcH6fjmAXrI48znOxOTaOmzz8jaCCDPHDY6eoiFmUjrf06-Tc_vdi5xELlPwLs5bufYwBN0GnOY',
-    type: 'gas',
-    logLabel: 'Log Fuel',
-    logIcon: 'local-gas-station'
-  },
-  {
-    id: '3',
-    name: 'Tesla Model 3',
-    status: 'ELECTRIC',
-    statusColor: '#10b981', // emerald-500
-    statusTextColor: '#FFFFFF',
-    lastUpdated: 'Last charged yesterday',
-    distance: '12,400 km',
-    efficiency: '185',
-    efficiencyUnit: 'WH/KM AVG',
-    efficiencyColor: '#FF7F11',
-    bgImage:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDdxZYHzs0ru-4RLSCCUW6FO_Wz3x_EOcw_i4P-HQjYhppAkF5XDsQaY0ddL3huhwEeYfnCG1npxzVtMUdU2nQHGHZMwOXFt9AYcsqC8JrJXCiUeDw5qk6gF9M6QVc1XcjwG3lLvcF_hXO3FEKLr3LOozG1vPLfaVieXIZ-Yo87yeoOdEJ6JHCsushhm9oZSVWLZZjRv7zqQjTcSi_FgH_CZl5gc1DD5BF63SWmfDWeqdvlfclMLmNR0i9j4Lw5_dElv1LKCtj6_x8',
-    type: 'electric',
-    logLabel: 'Log Charge',
-    logIcon: 'ev-station'
-  }
-]
 
 type StatCardProps = {
   label: string
@@ -106,7 +51,7 @@ function StatCard ({ label, value, unit, isDark, accentColor, variant = 'seconda
       <ThemedText style={[styles.statLabel, accentColor ? { color: accentColor } : undefined]}>
         {label}
       </ThemedText>
-      <View style={[styles.rowCenter, {alignItems: 'baseline'}]}>
+      <View style={[styles.rowCenter, { alignItems: 'baseline' }]}>
         <ThemedText style={[styles.statValue, variant === 'secondary' ? { color: '#FF7F11' } : undefined]}>
           {value}
         </ThemedText>
@@ -124,6 +69,9 @@ type VehicleCardProps = {
 }
 
 function VehicleCard ({ item, isDark, primaryColor, textColor }: VehicleCardProps): React.ReactElement {
+  const logIcon = item.type === 'electric' ? 'ev-station' : 'local-gas-station'
+  const logLabel = item.type === 'electric' ? 'Log Charge' : 'Log Fuel'
+
   return (
     <View
       style={[
@@ -152,7 +100,7 @@ function VehicleCard ({ item, isDark, primaryColor, textColor }: VehicleCardProp
           </View>
           <ThemedText style={styles.vehicleName}>{item.name}</ThemedText>
           <ThemedText style={styles.odometerText}>
-            {item.distance} • Odometer
+            {item.distance} km • Odometer
           </ThemedText>
         </View>
         <View style={styles.efficiencyContainer}>
@@ -172,8 +120,8 @@ function VehicleCard ({ item, isDark, primaryColor, textColor }: VehicleCardProp
           style={[styles.logButton, { backgroundColor: primaryColor }]}
           activeOpacity={0.9}
         >
-          <MaterialIcons name={item.logIcon} size={18} color='#FFF' />
-          <ThemedText style={styles.logButtonText}>{item.logLabel}</ThemedText>
+          <MaterialIcons name={logIcon} size={18} color='#FFF' />
+          <ThemedText style={styles.logButtonText}>{logLabel}</ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -186,13 +134,6 @@ function VehicleCard ({ item, isDark, primaryColor, textColor }: VehicleCardProp
           <MaterialIcons name='arrow-forward' size={20} color={textColor} />
         </TouchableOpacity>
       </View>
-
-      <Image
-        source={{ uri: item.bgImage }}
-        style={styles.cardBgImage}
-        contentFit='cover'
-        transition={1000}
-      />
     </View>
   )
 }
@@ -201,6 +142,51 @@ export default function HomeScreen (): React.ReactElement {
   const colorScheme = useColorScheme() ?? 'light'
   const theme = Colors[colorScheme]
   const isDark = colorScheme === 'dark'
+
+  const { data: vehiclesData } = useLiveQuery(
+    db.select().from(vehicles)
+  )
+
+  const { data: logsData } = useLiveQuery(
+    db.select().from(logs)
+  )
+
+  const processedVehicles = useMemo(() => {
+    if (!vehiclesData) return []
+
+    return vehiclesData.map((v) => {
+      const vehicleLogs = logsData?.filter(l => l.vehicleId === v.id) || []
+      let efficiencyValue = '0.0'
+
+      if (vehicleLogs.length > 0) {
+        const totalDistance = vehicleLogs.reduce((acc, l) => acc + (l.distance || 0), 0)
+        const totalAmount = vehicleLogs.reduce((acc, l) => acc + (l.amount || 0), 0)
+        if (totalAmount > 0) {
+          efficiencyValue = (totalDistance / totalAmount).toFixed(1)
+        }
+      }
+
+      return {
+        id: v.id,
+        name: v.name,
+        status: v.status,
+        statusColor: v.statusColor,
+        statusTextColor: v.statusTextColor,
+        lastUpdated: v.lastUpdated,
+        distance: v.distance.toLocaleString(),
+        efficiency: efficiencyValue,
+        efficiencyUnit: v.efficiencyUnit,
+        efficiencyColor: v.efficiencyColor,
+        type: v.type as 'gas' | 'electric'
+      }
+    })
+  }, [vehiclesData, logsData])
+
+  const avgEfficiency = useMemo(() => {
+    if (processedVehicles.length === 0) return '0.0'
+    const total = processedVehicles.reduce((acc, v) => acc + parseFloat(v.efficiency), 0)
+    return (total / processedVehicles.length).toFixed(1)
+  }, [processedVehicles])
 
   const renderHeader = (): React.ReactElement => (
     <View style={styles.contentContainer}>
@@ -212,7 +198,7 @@ export default function HomeScreen (): React.ReactElement {
       >
         <StatCard
           label='TOTAL FLEET'
-          value='3 Vehicles'
+          value={`${processedVehicles.length} Vehicles`}
           isDark={isDark}
           accentColor={theme.primary}
           variant='primary'
@@ -220,15 +206,15 @@ export default function HomeScreen (): React.ReactElement {
 
         <StatCard
           label='AVG. EFFICIENCY'
-          value='14.8'
+          value={avgEfficiency}
           unit='km/L'
           isDark={isDark}
           accentColor='#8dc9ce'
         />
 
         <StatCard
-          label='ACTIVE LOGS'
-          value='128'
+          label='TOTAL LOGS'
+          value={logsData?.length || 0}
           isDark={isDark}
           accentColor='#8dc9ce'
         />
@@ -279,7 +265,7 @@ export default function HomeScreen (): React.ReactElement {
       </View>
 
       <FlatList
-        data={VEHICLES}
+        data={processedVehicles}
         renderItem={({ item }) => (
           <VehicleCard
             item={item}
@@ -288,7 +274,7 @@ export default function HomeScreen (): React.ReactElement {
             textColor={theme.text}
           />
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
@@ -301,9 +287,19 @@ export default function HomeScreen (): React.ReactElement {
             {
               backgroundColor: theme.primary,
               shadowColor: theme.primary,
-              borderColor: theme.background
             }
           ]}
+          onPress={async () => {
+            // Quick test to seed data if empty
+            if (processedVehicles.length === 0) {
+              await db.insert(vehicles).values({
+                name: 'Mazda 3',
+                type: 'gas',
+                efficiencyUnit: 'KM/L AVG',
+                lastUpdated: 'Just now'
+              })
+            }
+          }}
         >
           <MaterialIcons name='add' size={32} color='#FFF' />
         </TouchableOpacity>
@@ -518,15 +514,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
     borderColor: 'rgba(0, 0, 0, 0.1)'
   },
-  cardBgImage: {
-    position: 'absolute',
-    bottom: -32,
-    right: -32,
-    width: 192,
-    height: 192,
-    opacity: 0.1,
-    transform: [{ rotate: '0deg' }] // ensure simple transform
-  },
   fabContainer: {
     position: 'absolute',
     bottom: 24,
@@ -543,6 +530,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 12,
     elevation: 8,
-    borderWidth: 4
   }
 })
