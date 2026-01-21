@@ -1,22 +1,23 @@
-import { MaterialIcons } from "@expo/vector-icons";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { StatusBar } from "expo-status-bar";
-import React, { useMemo } from "react";
-import {
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { db } from "@/db";
 import { logs } from "@/db/schema";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useVehicles } from "@/hooks/use-vehicles";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { useMemo } from "react";
+import {
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface Vehicle {
   id: number;
@@ -96,6 +97,7 @@ function VehicleCard({
   primaryColor,
   textColor,
 }: VehicleCardProps): React.ReactElement {
+  const router = useRouter();
   const logIcon = item.type === "electric" ? "ev-station" : "local-gas-station";
   const logLabel = item.type === "electric" ? "Log Charge" : "Log Fuel";
 
@@ -138,14 +140,21 @@ function VehicleCard({
       </View>
 
       <View style={styles.actionsRow}>
-        <TouchableOpacity
-          style={[styles.logButton, { backgroundColor: primaryColor }]}
-          activeOpacity={0.9}
+        <Pressable
+          style={({ pressed }) => [
+            styles.logButton,
+            { backgroundColor: primaryColor, opacity: pressed ? 0.9 : 1 },
+          ]}
+          onPress={() =>
+            router.push({
+              pathname: "/add-fuel-entry/[vehicleId]",
+              params: { vehicleId: item.id },
+            })
+          }
         >
           <MaterialIcons name={logIcon} size={18} color="#FFF" />
           <ThemedText style={styles.logButtonText}>{logLabel}</ThemedText>
-        </TouchableOpacity>
-
+        </Pressable>
         <TouchableOpacity
           style={[
             styles.arrowButton,
