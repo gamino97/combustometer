@@ -5,15 +5,15 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -237,7 +237,11 @@ export default function AddFuelEntryScreen() {
               <View
                 style={[
                   styles.unitBadge,
-                  { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9" },
+                  {
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.05)"
+                      : "#f1f5f9",
+                  },
                 ]}
               >
                 <ThemedText style={styles.unitText}>km</ThemedText>
@@ -408,65 +412,176 @@ export default function AddFuelEntryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  headerLight: {
-    backgroundColor: "rgba(249, 250, 250, 0.95)",
-    borderBottomColor: "#e2e8f0",
-  },
-  headerDark: {
-    backgroundColor: "rgba(21, 30, 31, 0.95)",
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
-  },
   backButton: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
   },
   backText: {
     fontSize: 16,
     fontWeight: "500",
     marginLeft: -4,
   },
-  headerTitleContainer: {
+  bottomBar: {
+    bottom: 0,
+    left: 0,
+    padding: 24,
+    position: "absolute",
+    right: 0,
+  },
+  cancelText: {
+    color: "#94a3b8",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  container: {
+    flex: 1,
+  },
+  currencySymbol: {
+    fontSize: 24,
+    fontWeight: "800",
+  },
+  dateRow: {
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  dateValue: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  halfinputCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    elevation: 2,
+    flex: 1,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  header: {
+    alignItems: "center",
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  headerDark: {
+    backgroundColor: "rgba(21, 30, 31, 0.95)",
+    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+  },
+  headerLight: {
+    backgroundColor: "rgba(249, 250, 250, 0.95)",
+    borderBottomColor: "#e2e8f0",
   },
   headerSubtitle: {
+    color: "#94a3b8",
     fontSize: 10,
     fontWeight: "700",
-    textTransform: "uppercase",
     letterSpacing: 2,
-    color: "#94a3b8", // Slate-400
+    textTransform: "uppercase", // Slate-400
   },
   headerTitle: {
     fontSize: 16,
     fontWeight: "800",
   },
-  cancelText: {
-    fontSize: 14,
-    fontWeight: "500",
+  headerTitleContainer: {
+    alignItems: "center",
+  },
+  iconContainer: {
+    borderRadius: 8,
+    padding: 8,
+  },
+  input: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: "700",
+    padding: 0,
+  },
+  inputCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    elevation: 2,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  inputLabel: {
     color: "#94a3b8",
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1,
+    marginBottom: 8,
+    textTransform: "uppercase",
+  },
+  inputRow: {
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  locationAddress: {
+    color: "#64748b",
+    fontSize: 12,
+  },
+  locationName: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  locationRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
+  mapPlaceholder: {
+    alignItems: "center",
+    borderRadius: 8,
+    height: 48,
+    justifyContent: "center",
+    width: 48,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  saveButton: {
+    alignItems: "center",
+    borderRadius: 12,
+    elevation: 4,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    paddingVertical: 16,
+    shadowColor: "#006c75",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  saveButtonText: {
+    color: "#FFF",
+    fontSize: 18,
+    fontWeight: "800",
   },
   scrollContent: {
     padding: 16,
     paddingBottom: 120, // Space for bottom bar
     gap: 16,
   },
+  suffixText: {
+    color: "#94a3b8",
+    fontSize: 14,
+    fontWeight: "700",
+    marginLeft: 4,
+  },
   summaryCard: {
-    borderRadius: 12,
-    padding: 24,
     alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 12,
     borderWidth: 1,
+    justifyContent: "center",
     overflow: "hidden",
+    padding: 24,
     position: "relative",
   },
   summaryIconBg: {
@@ -478,157 +593,46 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 10,
     fontWeight: "700",
-    textTransform: "uppercase",
     letterSpacing: 1,
     marginBottom: 4,
-  },
-  summaryValueContainer: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 4,
-  },
-  currencySymbol: {
-    fontSize: 24,
-    fontWeight: "800",
+    textTransform: "uppercase",
   },
   summaryValue: {
     fontSize: 40,
     fontWeight: "800",
     letterSpacing: -1,
   },
-  inputCard: {
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  dateRow: {
+  summaryValueContainer: {
+    alignItems: "baseline",
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  inputLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    color: "#94a3b8",
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  dateValue: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  iconContainer: {
-    padding: 8,
-    borderRadius: 8,
-  },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  input: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: "700",
-    padding: 0,
-  },
-  unitBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  unitText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#94a3b8",
-  },
-  rowContainer: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  halfinputCard: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  suffixText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#94a3b8",
-    marginLeft: 4,
-  },
-  toggleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    gap: 4,
   },
   toggleLabelContainer: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
     gap: 12,
+  },
+  toggleRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  toggleSubtitle: {
+    color: "#64748b",
+    fontSize: 12,
   },
   toggleTitle: {
     fontSize: 16,
     fontWeight: "700",
   },
-  toggleSubtitle: {
+  unitBadge: {
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  unitText: {
+    color: "#94a3b8",
     fontSize: 12,
-    color: "#64748b",
-  },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  mapPlaceholder: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  locationName: {
-    fontSize: 14,
     fontWeight: "700",
-  },
-  locationAddress: {
-    fontSize: 12,
-    color: "#64748b",
-  },
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 24,
-  },
-  saveButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
-    shadowColor: "#006c75",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  saveButtonText: {
-    color: "#FFF",
-    fontSize: 18,
-    fontWeight: "800",
   },
 });
