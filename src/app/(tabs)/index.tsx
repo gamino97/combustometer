@@ -14,8 +14,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { db } from "@/db";
-import { logs, vehicles } from "@/db/schema";
+import { logs } from "@/db/schema";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useVehicles } from "@/hooks/use-vehicles";
 
 interface Vehicle {
   id: number;
@@ -163,11 +164,8 @@ export default function HomeScreen(): React.ReactElement {
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
   const isDark = colorScheme === "dark";
-
-  const { data: vehiclesData } = useLiveQuery(db.select().from(vehicles));
-
+  const { vehicles: vehiclesData, addVehicle } = useVehicles();
   const { data: logsData } = useLiveQuery(db.select().from(logs));
-
   const processedVehicles = useMemo(() => {
     if (!vehiclesData) return [];
 
@@ -315,7 +313,7 @@ export default function HomeScreen(): React.ReactElement {
           onPress={async () => {
             // Quick test to seed data if empty
             if (processedVehicles.length === 0) {
-              await db.insert(vehicles).values({
+              await addVehicle({
                 name: "Mazda 3",
                 type: "gas",
                 efficiencyUnit: "KM/L AVG",
