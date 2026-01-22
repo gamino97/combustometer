@@ -10,6 +10,9 @@ export const getVehiclesQuery = db
   .from(vehicles)
   .orderBy(vehicles.name);
 
+export const getVehicleQuery = (id: number) =>
+  db.select().from(vehicles).where(eq(vehicles.id, id));
+
 export const addVehicle = async (vehicle: NewVehicle) => {
   const result = await db.insert(vehicles).values(vehicle);
   return result;

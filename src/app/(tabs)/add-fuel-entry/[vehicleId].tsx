@@ -1,107 +1,90 @@
+import { ControlledInput } from "@/components/controlled-input";
+import { ThemedText } from "@/components/themed-text";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useAddFuelEntry } from "@/hooks/use-fuel-entry";
+import { FuelEntryData } from "@/schemas/fuel-entry";
 import { MaterialIcons } from "@expo/vector-icons";
-import { eq } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useState } from "react";
+import { Control, Controller, useWatch } from "react-hook-form";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ThemedText } from "@/components/themed-text";
-import { Colors } from "@/constants/theme";
-import { db } from "@/db";
-import { logs, vehicles } from "@/db/schema";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+function NoVehicle() {
+  return (
+    <View>
+      <ThemedText>No vehicle found</ThemedText>
+    </View>
+  );
+}
+
+function SummaryCard({ control }: { control: Control<FuelEntryData> }) {
+  const isDark = useColorScheme() === "dark";
+  const theme = Colors[isDark ? "dark" : "light"];
+  const liters = useWatch({ control, name: "liters" });
+  const pricePerLiter = useWatch({ control, name: "pricePerLiter" });
+  const totalCost = (
+    (Number(liters) || 0) * (Number(pricePerLiter) || 0)
+  ).toFixed(2);
+
+  return (
+    <View
+      style={[
+        styles.summaryCard,
+        {
+          backgroundColor: isDark
+            ? "rgba(0, 108, 117, 0.2)"
+            : "rgba(0, 108, 117, 0.1)",
+          borderColor: "rgba(0, 108, 117, 0.2)",
+        },
+      ]}
+    >
+      <View style={styles.summaryIconBg}>
+        <MaterialIcons
+          name="payments"
+          size={120}
+          color={theme.primary}
+          style={{ opacity: 0.1 }}
+        />
+      </View>
+      <ThemedText style={[styles.summaryLabel, { color: theme.primary }]}>
+        ESTIMATED TOTAL COST
+      </ThemedText>
+      <View style={styles.summaryValueContainer}>
+        <ThemedText style={[styles.currencySymbol, { color: theme.primary }]}>
+          $
+        </ThemedText>
+        <ThemedText style={[styles.summaryValue, { color: theme.primary }]}>
+          {totalCost}
+        </ThemedText>
+      </View>
+    </View>
+  );
+}
 
 export default function AddFuelEntryScreen() {
-  const router = useRouter();
   const { vehicleId } = useLocalSearchParams<{ vehicleId: string }>();
+  const id = Number(vehicleId);
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme];
   const isDark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
+  const { form, submit, vehicle } = useAddFuelEntry(id);
+  const router = useRouter();
+  const date = form.watch("date");
+  if (!vehicle) return <NoVehicle />;
 
-  const [odometer, setOdometer] = useState("");
-  const [liters, setLiters] = useState("");
-  const [pricePerLiter, setPricePerLiter] = useState("");
-  const [isFullTank, setIsFullTank] = useState(true);
-
-  // Fetch vehicle to get current odometer
-  const { data: vehicleData } = useLiveQuery(
-    db
-      .select()
-      .from(vehicles)
-      .where(eq(vehicles.id, Number(vehicleId))),
-  );
-  const vehicle = vehicleData?.[0];
-
-  useEffect(() => {
-    if (vehicle) {
-      setOdometer(vehicle.distance.toString());
-    }
-  }, [vehicle]);
-
-  const totalCost = (
-    (parseFloat(liters) || 0) * (parseFloat(pricePerLiter) || 0)
-  ).toFixed(2);
-
-  const handleSave = async () => {
-    if (!vehicle || !odometer || !liters) {
-      Alert.alert("Error", "Please fill in all required fields");
-      return;
-    }
-
-    const currentOdometer = parseFloat(odometer);
-    const previousOdometer = vehicle.distance;
-    const distanceTraveled = currentOdometer - previousOdometer;
-    const fuelAmount = parseFloat(liters);
-
-    if (distanceTraveled < 0) {
-      Alert.alert(
-        "Error",
-        "New odometer reading cannot be less than previous reading",
-      );
-      return;
-    }
-
-    try {
-      await db.transaction(async (tx) => {
-        // Insert log
-        await tx.insert(logs).values({
-          vehicleId: vehicle.id,
-          amount: fuelAmount,
-          distance: distanceTraveled,
-          date: new Date().toISOString(),
-        });
-
-        // Update vehicle odometer
-        await tx
-          .update(vehicles)
-          .set({
-            distance: currentOdometer,
-            lastUpdated: new Date().toLocaleDateString(),
-          })
-          .where(eq(vehicles.id, vehicle.id));
-      });
-
-      router.back();
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "Failed to save entry");
-    }
-  };
-
-  const currentDate = new Date().toLocaleDateString("en-US", {
+  const currentDate = date.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -147,41 +130,7 @@ export default function AddFuelEntryScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Summary Card */}
-          <View
-            style={[
-              styles.summaryCard,
-              {
-                backgroundColor: isDark
-                  ? "rgba(0, 108, 117, 0.2)"
-                  : "rgba(0, 108, 117, 0.1)",
-                borderColor: "rgba(0, 108, 117, 0.2)",
-              },
-            ]}
-          >
-            <View style={styles.summaryIconBg}>
-              <MaterialIcons
-                name="payments"
-                size={120}
-                color={theme.primary}
-                style={{ opacity: 0.1 }}
-              />
-            </View>
-            <ThemedText style={[styles.summaryLabel, { color: theme.primary }]}>
-              ESTIMATED TOTAL COST
-            </ThemedText>
-            <View style={styles.summaryValueContainer}>
-              <ThemedText
-                style={[styles.currencySymbol, { color: theme.primary }]}
-              >
-                $
-              </ThemedText>
-              <ThemedText
-                style={[styles.summaryValue, { color: theme.primary }]}
-              >
-                {totalCost}
-              </ThemedText>
-            </View>
-          </View>
+          <SummaryCard control={form.control} />
 
           {/* Date Selection */}
           <View
@@ -214,90 +163,39 @@ export default function AddFuelEntryScreen() {
           </View>
 
           {/* Odometer Input */}
-          <View
-            style={[
-              styles.inputCard,
-              {
-                backgroundColor: isDark ? theme.surface : theme.surface,
-                borderColor: theme.surfaceBorder,
-              },
-            ]}
-          >
-            <ThemedText style={styles.inputLabel}>Odometer Reading</ThemedText>
-            <View style={styles.inputRow}>
-              <TextInput
-                style={[styles.input, { color: theme.text }]}
-                value={odometer}
-                onChangeText={setOdometer}
-                placeholder="0"
-                placeholderTextColor={isDark ? "#666" : "#999"}
-                keyboardType="numeric"
-                returnKeyType="done"
-              />
-              <View
-                style={[
-                  styles.unitBadge,
-                  {
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.05)"
-                      : "#f1f5f9",
-                  },
-                ]}
-              >
-                <ThemedText style={styles.unitText}>km</ThemedText>
-              </View>
-            </View>
-          </View>
+          <ControlledInput
+            control={form.control}
+            name="odometer"
+            label="Odometer Reading"
+            unit="km"
+            placeholder="0"
+            keyboardType="numeric"
+            returnKeyType="done"
+          />
 
           {/* Volume and Price Row */}
           <View style={styles.rowContainer}>
-            <View
-              style={[
-                styles.halfinputCard,
-                {
-                  backgroundColor: isDark ? theme.surface : theme.surface,
-                  borderColor: theme.surfaceBorder,
-                },
-              ]}
-            >
-              <ThemedText style={styles.inputLabel}>Liters</ThemedText>
-              <View style={styles.inputRow}>
-                <TextInput
-                  style={[styles.input, { color: theme.text }]}
-                  value={liters}
-                  onChangeText={setLiters}
-                  placeholder="0.00"
-                  placeholderTextColor={isDark ? "#666" : "#999"}
-                  keyboardType="decimal-pad"
-                  returnKeyType="done"
-                />
-                <ThemedText style={styles.suffixText}>L</ThemedText>
-              </View>
-            </View>
+            <ControlledInput
+              control={form.control}
+              name="liters"
+              label="Liters"
+              suffix="L"
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+              returnKeyType="done"
+              containerStyle={styles.flex1}
+            />
 
-            <View
-              style={[
-                styles.halfinputCard,
-                {
-                  backgroundColor: isDark ? theme.surface : theme.surface,
-                  borderColor: theme.surfaceBorder,
-                },
-              ]}
-            >
-              <ThemedText style={styles.inputLabel}>Price/L</ThemedText>
-              <View style={styles.inputRow}>
-                <TextInput
-                  style={[styles.input, { color: theme.text }]}
-                  value={pricePerLiter}
-                  onChangeText={setPricePerLiter}
-                  placeholder="0.000"
-                  placeholderTextColor={isDark ? "#666" : "#999"}
-                  keyboardType="decimal-pad"
-                  returnKeyType="done"
-                />
-                <ThemedText style={styles.suffixText}>$</ThemedText>
-              </View>
-            </View>
+            <ControlledInput
+              control={form.control}
+              name="pricePerLiter"
+              label="Price/L"
+              suffix="$"
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+              returnKeyType="done"
+              containerStyle={styles.flex1}
+            />
           </View>
 
           {/* Full Tank Toggle */}
@@ -331,55 +229,19 @@ export default function AddFuelEntryScreen() {
                   </ThemedText>
                 </View>
               </View>
-              <Switch
-                value={isFullTank}
-                onValueChange={setIsFullTank}
-                trackColor={{ false: "#767577", true: theme.primary }}
-                thumbColor={"#f4f3f4"}
-                ios_backgroundColor="#3e3e3e"
+              <Controller
+                control={form.control}
+                name="isFullTank"
+                render={({ field: { onChange, value } }) => (
+                  <Switch
+                    value={value}
+                    onValueChange={onChange}
+                    trackColor={{ false: "#767577", true: theme.primary }}
+                    thumbColor={"#f4f3f4"}
+                    ios_backgroundColor="#3e3e3e"
+                  />
+                )}
               />
-            </View>
-          </View>
-
-          {/* Location (Static for now as per HTML) */}
-          <View
-            style={[
-              styles.inputCard,
-              {
-                backgroundColor: isDark ? theme.surface : theme.surface,
-                borderColor: theme.surfaceBorder,
-              },
-            ]}
-          >
-            <ThemedText style={[styles.inputLabel, { marginBottom: 12 }]}>
-              Location
-            </ThemedText>
-            <View style={styles.locationRow}>
-              <View
-                style={[
-                  styles.mapPlaceholder,
-                  {
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.05)"
-                      : "#f1f5f9",
-                  },
-                ]}
-              >
-                <MaterialIcons
-                  name="map"
-                  size={24}
-                  color={isDark ? "#666" : "#999"}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <ThemedText style={styles.locationName}>
-                  Shell Express
-                </ThemedText>
-                <ThemedText style={styles.locationAddress}>
-                  8400 Santa Monica Blvd, West Hollywood
-                </ThemedText>
-              </View>
-              <MaterialIcons name="edit" size={20} color="#999" />
             </View>
           </View>
         </ScrollView>
@@ -390,22 +252,23 @@ export default function AddFuelEntryScreen() {
         style={[
           styles.bottomBar,
           {
-            backgroundColor: theme.background, // Should ideally be gradient or transparent but View doesn't support gradient natively without expo-linear-gradient.
-            // Using solid background for simplicity and "keeping same design" roughly.
+            backgroundColor: theme.background,
             borderTopColor: theme.surfaceBorder,
             borderTopWidth: 1,
             paddingBottom: insets.bottom + 20,
           },
         ]}
       >
-        <TouchableOpacity
-          style={[styles.saveButton, { backgroundColor: theme.primary }]}
-          onPress={handleSave}
-          activeOpacity={0.8}
+        <Pressable
+          style={({ pressed }) => [
+            styles.saveButton,
+            { backgroundColor: theme.primary, opacity: pressed ? 0.8 : 1 },
+          ]}
+          onPress={submit}
         >
           <MaterialIcons name="save" size={24} color="#FFF" />
           <ThemedText style={styles.saveButtonText}>Save Entry</ThemedText>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
@@ -449,16 +312,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  halfinputCard: {
-    borderRadius: 12,
-    borderWidth: 1,
-    elevation: 2,
+  flex1: {
     flex: 1,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
   },
   header: {
     alignItems: "center",
@@ -481,7 +336,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 2,
-    textTransform: "uppercase", // Slate-400
+    textTransform: "uppercase",
   },
   headerTitle: {
     fontSize: 16,
@@ -493,12 +348,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     borderRadius: 8,
     padding: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: "700",
-    padding: 0,
   },
   inputCard: {
     borderRadius: 12,
@@ -517,30 +366,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 8,
     textTransform: "uppercase",
-  },
-  inputRow: {
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  locationAddress: {
-    color: "#64748b",
-    fontSize: 12,
-  },
-  locationName: {
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  locationRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-  },
-  mapPlaceholder: {
-    alignItems: "center",
-    borderRadius: 8,
-    height: 48,
-    justifyContent: "center",
-    width: 48,
   },
   rowContainer: {
     flexDirection: "row",
@@ -565,15 +390,9 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   scrollContent: {
-    padding: 16,
-    paddingBottom: 120, // Space for bottom bar
     gap: 16,
-  },
-  suffixText: {
-    color: "#94a3b8",
-    fontSize: 14,
-    fontWeight: "700",
-    marginLeft: 4,
+    padding: 16,
+    paddingBottom: 120,
   },
   summaryCard: {
     alignItems: "center",
@@ -623,16 +442,6 @@ const styles = StyleSheet.create({
   },
   toggleTitle: {
     fontSize: 16,
-    fontWeight: "700",
-  },
-  unitBadge: {
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  unitText: {
-    color: "#94a3b8",
-    fontSize: 12,
     fontWeight: "700",
   },
 });

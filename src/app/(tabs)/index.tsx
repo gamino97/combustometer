@@ -475,8 +475,8 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   listContent: {
-    paddingBottom: 100, // Space for FAB
     gap: 20,
+    paddingBottom: 100, // Space for FAB
   },
   logButton: {
     alignItems: "center",
