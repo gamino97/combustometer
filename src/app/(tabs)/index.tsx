@@ -1,10 +1,10 @@
 import { ThemedText } from "@/components/themed-text";
-import { Colors } from "@/constants/theme";
 import { db } from "@/db";
 import { logs } from "@/db/schema";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useAppTheme } from "@/hooks/use-app-theme";
 import { useVehicles } from "@/hooks/use-vehicles";
 import { MaterialIcons } from "@expo/vector-icons";
+import { formatRelative } from "date-fns";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -19,25 +19,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-interface Vehicle {
-  id: number;
-  name: string;
-  status: string;
-  statusColor: string;
-  statusTextColor: string;
-  lastUpdated: string;
-  distance: string;
-  efficiency: string;
-  efficiencyUnit: string;
-  efficiencyColor: string;
-  type: "gas" | "electric";
-}
+const numberFormat = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
 
 type StatCardProps = {
   label: string;
   value: string | number;
   unit?: string;
-  isDark: boolean;
   accentColor?: string;
   variant?: "primary" | "secondary";
 };
@@ -46,10 +36,10 @@ function StatCard({
   label,
   value,
   unit,
-  isDark,
   accentColor,
   variant = "secondary",
 }: StatCardProps): React.ReactElement {
+  const { theme, isDark } = useAppTheme();
   const cardStyle = [
     styles.statCard,
     variant === "primary"
@@ -58,7 +48,6 @@ function StatCard({
         ? styles.statCardSecondaryDark
         : styles.statCardSecondaryLight,
   ];
-
   return (
     <View style={cardStyle}>
       <ThemedText
@@ -73,7 +62,7 @@ function StatCard({
         <ThemedText
           style={[
             styles.statValue,
-            variant === "secondary" ? { color: "#FF7F11" } : undefined,
+            variant === "secondary" ? { color: theme.accentOrange } : undefined,
           ]}
         >
           {value}
@@ -85,7 +74,7 @@ function StatCard({
 }
 
 type VehicleCardProps = {
-  item: Vehicle;
+  item: ReturnType<typeof useVehicles>["vehicles"][number];
   isDark: boolean;
   primaryColor: string;
   textColor: string;
@@ -100,6 +89,7 @@ function VehicleCard({
   const router = useRouter();
   const logIcon = item.type === "electric" ? "ev-station" : "local-gas-station";
   const logLabel = item.type === "electric" ? "Log Charge" : "Log Fuel";
+  const logTime = formatRelative(new Date(item.lastUpdated), new Date());
 
   return (
     <View style={[styles.card, isDark ? styles.cardDark : styles.cardLight]}>
@@ -119,19 +109,19 @@ function VehicleCard({
               </ThemedText>
             </View>
             <ThemedText style={styles.lastUpdatedText}>
-              {item.lastUpdated}
+              Last refueled {logTime}
             </ThemedText>
           </View>
           <ThemedText style={styles.vehicleName}>{item.name}</ThemedText>
           <ThemedText style={styles.odometerText}>
-            {item.distance} km • Odometer
+            {numberFormat.format(item.distance)} km • Odometer
           </ThemedText>
         </View>
         <View style={styles.efficiencyContainer}>
           <ThemedText
             style={[styles.efficiencyValue, { color: item.efficiencyColor }]}
           >
-            {item.efficiency}
+            {numberFormat.format(item.efficiency ?? 0)}
           </ThemedText>
           <ThemedText style={styles.efficiencyUnit}>
             {item.efficiencyUnit}
@@ -155,69 +145,45 @@ function VehicleCard({
           <MaterialIcons name={logIcon} size={18} color="#FFF" />
           <ThemedText style={styles.logButtonText}>{logLabel}</ThemedText>
         </Pressable>
-        <TouchableOpacity
-          style={[
+        <Pressable
+          style={({ pressed }) => [
             styles.arrowButton,
             isDark ? styles.arrowButtonDark : styles.arrowButtonLight,
+            { opacity: pressed ? 0.7 : 1 },
           ]}
-          activeOpacity={0.7}
         >
           <MaterialIcons name="arrow-forward" size={20} color={textColor} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
 }
 
 export default function HomeScreen(): React.ReactElement {
-  const colorScheme = useColorScheme() ?? "light";
-  const theme = Colors[colorScheme];
-  const isDark = colorScheme === "dark";
+  const { theme, isDark } = useAppTheme();
   const { vehicles: vehiclesData, addVehicle } = useVehicles();
   const { data: logsData } = useLiveQuery(db.select().from(logs));
   const processedVehicles = useMemo(() => {
     if (!vehiclesData) return [];
 
-    return vehiclesData.map((v) => {
-      const vehicleLogs = logsData?.filter((l) => l.vehicleId === v.id) || [];
-      let efficiencyValue = "0.0";
-
-      if (vehicleLogs.length > 0) {
-        const totalDistance = vehicleLogs.reduce(
-          (acc, l) => acc + (l.distance || 0),
-          0,
-        );
-        const totalAmount = vehicleLogs.reduce(
-          (acc, l) => acc + (l.amount || 0),
-          0,
-        );
-        if (totalAmount > 0) {
-          efficiencyValue = (totalDistance / totalAmount).toFixed(1);
-        }
-      }
-
-      return {
-        id: v.id,
-        name: v.name,
-        status: v.status,
-        statusColor: v.statusColor,
-        statusTextColor: v.statusTextColor,
-        lastUpdated: v.lastUpdated,
-        distance: v.distance.toLocaleString(),
-        efficiency: efficiencyValue,
-        efficiencyUnit: v.efficiencyUnit,
-        efficiencyColor: v.efficiencyColor,
-        type: v.type as "gas" | "electric",
-      };
-    });
-  }, [vehiclesData, logsData]);
+    return vehiclesData.map((v) => ({
+      id: v.id,
+      name: v.name,
+      status: v.status,
+      statusColor: v.statusColor,
+      statusTextColor: v.statusTextColor,
+      lastUpdated: v.lastUpdated,
+      distance: v.distance,
+      efficiency: v.efficiency,
+      efficiencyUnit: v.efficiencyUnit,
+      efficiencyColor: v.efficiencyColor,
+      type: v.type as "gas" | "electric",
+    }));
+  }, [vehiclesData]);
 
   const avgEfficiency = useMemo(() => {
     if (processedVehicles.length === 0) return "0.0";
-    const total = processedVehicles.reduce(
-      (acc, v) => acc + parseFloat(v.efficiency),
-      0,
-    );
+    const total = processedVehicles.reduce((acc, v) => acc + v.efficiency, 0);
     return (total / processedVehicles.length).toFixed(1);
   }, [processedVehicles]);
 
@@ -232,7 +198,6 @@ export default function HomeScreen(): React.ReactElement {
         <StatCard
           label="TOTAL FLEET"
           value={`${processedVehicles.length} Vehicles`}
-          isDark={isDark}
           accentColor={theme.primary}
           variant="primary"
         />
@@ -241,14 +206,12 @@ export default function HomeScreen(): React.ReactElement {
           label="AVG. EFFICIENCY"
           value={avgEfficiency}
           unit="km/L"
-          isDark={isDark}
           accentColor="#8dc9ce"
         />
 
         <StatCard
           label="TOTAL LOGS"
           value={logsData?.length || 0}
-          isDark={isDark}
           accentColor="#8dc9ce"
         />
       </ScrollView>
@@ -261,7 +224,6 @@ export default function HomeScreen(): React.ReactElement {
       edges={["top", "left", "right"]}
     >
       <StatusBar style={isDark ? "light" : "dark"} />
-
       <View
         style={[styles.header, isDark ? styles.headerDark : styles.headerLight]}
       >
@@ -273,11 +235,7 @@ export default function HomeScreen(): React.ReactElement {
               isDark ? styles.iconButtonDark : styles.iconButtonLight,
             ]}
           >
-            <MaterialIcons
-              name="search"
-              size={20}
-              color={isDark ? "#FFF" : "#000"}
-            />
+            <MaterialIcons name="search" size={20} color={theme.text} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[
@@ -285,15 +243,10 @@ export default function HomeScreen(): React.ReactElement {
               isDark ? styles.iconButtonDark : styles.iconButtonLight,
             ]}
           >
-            <MaterialIcons
-              name="settings"
-              size={20}
-              color={isDark ? "#FFF" : "#000"}
-            />
+            <MaterialIcons name="settings" size={20} color={theme.text} />
           </TouchableOpacity>
         </View>
       </View>
-
       <FlatList
         data={processedVehicles}
         renderItem={({ item }) => (
@@ -331,7 +284,7 @@ export default function HomeScreen(): React.ReactElement {
             }
           }}
         >
-          <MaterialIcons name="add" size={32} color="#FFF" />
+          <MaterialIcons name="add" size={32} color={theme.text} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>

@@ -10,6 +10,7 @@ export const vehicles = sqliteTable("vehicles", {
   statusColor: text("status_color").notNull().default("#006c75"),
   statusTextColor: text("status_text_color").notNull().default("#FFFFFF"),
   distance: integer("distance").notNull().default(0),
+  efficiency: real("efficiency").notNull().default(0),
   efficiencyUnit: text("efficiency_unit").notNull(),
   efficiencyColor: text("efficiency_color").notNull().default("#FF7F11"),
   lastUpdated: text("last_updated").notNull(),

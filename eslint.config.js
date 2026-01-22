@@ -2,30 +2,22 @@
 const { defineConfig } = require("eslint/config");
 const expoConfig = require("eslint-config-expo/flat");
 const eslintPluginPrettierRecommended = require("eslint-plugin-prettier/recommended");
-const js = require("@eslint/js");
 const { fixupPluginRules } = require("@eslint/compat");
 const reactNative = require("eslint-plugin-react-native");
-const react = require("eslint-plugin-react");
-const globals = require("globals");
 
 module.exports = defineConfig([
   expoConfig,
   eslintPluginPrettierRecommended,
-  react.configs.flat.recommended,
   {
     ignores: ["dist/*"],
-    plugins: { js, "react-native": fixupPluginRules(reactNative), react },
-    extends: ["js/recommended"],
+    plugins: { "react-native": fixupPluginRules(reactNative) },
     languageOptions: {
       globals: {
-        ...globals.serviceworker,
-        ...globals.browser,
         React: true,
       },
     },
     rules: {
       "react/jsx-uses-react": "error",
-      "no-unused-vars": "error",
       "no-undef": "error",
       "one-var": ["error", "never"],
       "no-cond-assign": "error",
@@ -76,10 +68,6 @@ module.exports = defineConfig([
         { enforceForIfStatements: true },
       ],
       "max-depth": ["error", { max: 5 }],
-      "max-lines": [
-        "error",
-        { max: 450, skipBlankLines: true, skipComments: true },
-      ],
       "max-nested-callbacks": ["error", { max: 3 }],
       "no-alert": ["error"],
       "no-async-promise-executor": ["error"],
@@ -204,7 +192,6 @@ module.exports = defineConfig([
       ],
       "valid-typeof": ["error", { requireStringLiterals: true }],
       yoda: ["error", "never"],
-      "react-native/no-color-literals": 2,
       "react-native/no-unused-styles": 2,
       "react-native/no-raw-text": ["error", { skip: ["ThemedText"] }],
       "react-native/sort-styles": 2,

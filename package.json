@@ -18,6 +18,8 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "babel-plugin-inline-import": "^3.0.0",
+    "date-fns": "^4.1.0",
+    "decimal.js": "^10.6.0",
     "drizzle-orm": "^0.45.1",
     "expo": "~54.0.31",
     "expo-constants": "~18.0.13",

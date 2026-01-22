@@ -1,7 +1,9 @@
 import { db } from "@/db";
-import { logs, vehicles } from "@/db/schema";
+import { logs } from "@/db/schema";
 import { FuelEntryData } from "@/schemas/fuel-entry";
+import { calculateAverageEfficiency } from "@/utils/calculations";
 import { eq } from "drizzle-orm";
+import { updateVehicle } from "./vehicle";
 
 export const addFuelEntry = async (vehicleId: number, data: FuelEntryData) => {
   const { odometer, liters, date, pricePerLiter, isFullTank } = data;
@@ -17,13 +19,14 @@ export const addFuelEntry = async (vehicleId: number, data: FuelEntryData) => {
       liters,
     });
 
-    // Update vehicle odometer
-    await tx
-      .update(vehicles)
-      .set({
-        distance: odometer,
-        lastUpdated: new Date().toISOString(),
-      })
-      .where(eq(vehicles.id, vehicleId));
+    // Recalculate efficiency
+    const vehicleLogs = await tx
+      .select()
+      .from(logs)
+      .where(eq(logs.vehicleId, vehicleId));
+
+    const efficiency = calculateAverageEfficiency(vehicleLogs);
+    // Update vehicle odometer and efficiency
+    await updateVehicle(vehicleId, { distance: odometer, efficiency });
   });
 };
