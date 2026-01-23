@@ -128,7 +128,6 @@ function VehicleCard({
           </ThemedText>
         </View>
       </View>
-
       <View style={styles.actionsRow}>
         <Pressable
           style={({ pressed }) => [
@@ -165,7 +164,6 @@ export default function HomeScreen(): React.ReactElement {
   const { data: logsData } = useLiveQuery(db.select().from(logs));
   const processedVehicles = useMemo(() => {
     if (!vehiclesData) return [];
-
     return vehiclesData.map((v) => ({
       id: v.id,
       name: v.name,
@@ -201,14 +199,12 @@ export default function HomeScreen(): React.ReactElement {
           accentColor={theme.primary}
           variant="primary"
         />
-
         <StatCard
           label="AVG. EFFICIENCY"
           value={avgEfficiency}
           unit="km/L"
           accentColor="#8dc9ce"
         />
-
         <StatCard
           label="TOTAL LOGS"
           value={logsData?.length || 0}

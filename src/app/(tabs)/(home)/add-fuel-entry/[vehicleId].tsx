@@ -399,7 +399,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     justifyContent: "center",
-    overflow: "hidden",
     padding: 24,
     position: "relative",
   },
@@ -419,7 +418,9 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontSize: 40,
     fontWeight: "800",
+    height: "100%",
     letterSpacing: -1,
+    textAlignVertical: "center",
   },
   summaryValueContainer: {
     alignItems: "baseline",
