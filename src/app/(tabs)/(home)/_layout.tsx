@@ -8,6 +8,7 @@ export default function HomeLayout(): React.ReactElement {
         name="add-fuel-entry/[vehicleId]"
         options={{ headerShown: false }}
       />
+      <Stack.Screen name="add-vehicle" options={{ headerShown: false }} />
     </Stack>
   );
 }

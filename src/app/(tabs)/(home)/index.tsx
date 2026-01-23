@@ -6,7 +6,7 @@ import { useVehicles } from "@/hooks/use-vehicles";
 import { MaterialIcons } from "@expo/vector-icons";
 import { formatRelative } from "date-fns";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { useRouter } from "expo-router";
+import { router, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
 import {
@@ -269,15 +269,7 @@ export default function HomeScreen(): React.ReactElement {
             },
           ]}
           onPress={async () => {
-            // Quick test to seed data if empty
-            if (processedVehicles.length === 0) {
-              await addVehicle({
-                name: "Mazda 3",
-                type: "gas",
-                efficiencyUnit: "KM/L AVG",
-                lastUpdated: "Just now",
-              });
-            }
+            router.push("/add-vehicle");
           }}
         >
           <MaterialIcons name="add" size={32} color={theme.text} />
