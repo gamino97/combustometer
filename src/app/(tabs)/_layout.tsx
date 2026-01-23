@@ -6,6 +6,12 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+// eslint-disable-next-line camelcase
+export const unstable_settings = {
+  // Ensure any route can link back to `/`
+  initialRouteName: "(home)",
+};
+
 export default function TabLayout(): React.ReactElement {
   const colorScheme = useColorScheme();
 
@@ -18,7 +24,7 @@ export default function TabLayout(): React.ReactElement {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(home)"
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
