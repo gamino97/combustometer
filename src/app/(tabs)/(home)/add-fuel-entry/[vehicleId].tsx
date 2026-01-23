@@ -1,21 +1,19 @@
 import { ControlledInput } from "@/components/controlled-input";
+import { ScreenLayout } from "@/components/screen-layout";
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAddFuelEntry } from "@/hooks/use-fuel-entry";
 import { FuelEntryData } from "@/schemas/fuel-entry";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { useLocalSearchParams } from "expo-router";
 import { Control, Controller, useWatch } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Switch,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -80,7 +78,6 @@ export default function AddFuelEntryScreen() {
   const isDark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
   const { form, submit, vehicle } = useAddFuelEntry(id);
-  const router = useRouter();
   const date = form.watch("date");
   if (!vehicle) return <NoVehicle />;
 
@@ -91,160 +88,131 @@ export default function AddFuelEntryScreen() {
   });
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <StatusBar style={isDark ? "light" : "dark"} />
-
-      {/* Header */}
-      <View
-        style={[
-          styles.header,
-          { paddingTop: insets.top },
-          isDark ? styles.headerDark : styles.headerLight,
-        ]}
-      >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <MaterialIcons name="chevron-left" size={28} color={theme.primary} />
-          <ThemedText style={[styles.backText, { color: theme.primary }]}>
-            Back
-          </ThemedText>
-        </TouchableOpacity>
-
-        <View style={styles.headerTitleContainer}>
-          <ThemedText style={styles.headerSubtitle}>REFUELING</ThemedText>
-          <ThemedText style={styles.headerTitle}>
-            {vehicle?.name || "Vehicle"}
-          </ThemedText>
-        </View>
-
-        <TouchableOpacity onPress={() => router.back()}>
-          <ThemedText style={styles.cancelText}>Cancel</ThemedText>
-        </TouchableOpacity>
-      </View>
-
+    <ScreenLayout
+      title={vehicle?.name || "Vehicle"}
+      subtitle="Refueling"
+      showBackButton
+      scrollable
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={styles.scrollContent}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Summary Card */}
-          <SummaryCard control={form.control} />
+        {/* Summary Card */}
+        <SummaryCard control={form.control} />
 
-          {/* Date Selection */}
-          <View
-            style={[
-              styles.inputCard,
-              {
-                backgroundColor: isDark ? theme.surface : theme.surface,
-                borderColor: theme.surfaceBorder,
-              },
-            ]}
-          >
-            <View style={styles.dateRow}>
-              <View>
-                <ThemedText style={styles.inputLabel}>Date</ThemedText>
-                <ThemedText style={styles.dateValue}>{currentDate}</ThemedText>
-              </View>
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: "rgba(0, 108, 117, 0.1)" },
-                ]}
-              >
-                <MaterialIcons
-                  name="calendar-today"
-                  size={20}
-                  color={theme.primary}
-                />
-              </View>
+        {/* Date Selection */}
+        <View
+          style={[
+            styles.inputCard,
+            {
+              backgroundColor: isDark ? theme.surface : theme.surface,
+              borderColor: theme.surfaceBorder,
+            },
+          ]}
+        >
+          <View style={styles.dateRow}>
+            <View>
+              <ThemedText style={styles.inputLabel}>Date</ThemedText>
+              <ThemedText style={styles.dateValue}>{currentDate}</ThemedText>
             </View>
-          </View>
-
-          {/* Odometer Input */}
-          <ControlledInput
-            control={form.control}
-            name="odometer"
-            label="Odometer Reading"
-            unit="km"
-            placeholder="0"
-            keyboardType="numeric"
-            returnKeyType="done"
-          />
-
-          {/* Volume and Price Row */}
-          <View style={styles.rowContainer}>
-            <ControlledInput
-              control={form.control}
-              name="liters"
-              label="Liters"
-              suffix="L"
-              placeholder="0.00"
-              keyboardType="decimal-pad"
-              returnKeyType="done"
-              containerStyle={styles.flex1}
-            />
-
-            <ControlledInput
-              control={form.control}
-              name="pricePerLiter"
-              label="Price/L"
-              suffix="$"
-              placeholder="0.00"
-              keyboardType="decimal-pad"
-              returnKeyType="done"
-              containerStyle={styles.flex1}
-            />
-          </View>
-
-          {/* Full Tank Toggle */}
-          <View
-            style={[
-              styles.inputCard,
-              {
-                backgroundColor: isDark ? theme.surface : theme.surface,
-                borderColor: theme.surfaceBorder,
-              },
-            ]}
-          >
-            <View style={styles.toggleRow}>
-              <View style={styles.toggleLabelContainer}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    { backgroundColor: "rgba(255, 127, 17, 0.1)" },
-                  ]}
-                >
-                  <MaterialIcons
-                    name="ev-station"
-                    size={20}
-                    color={theme.accentOrange}
-                  />
-                </View>
-                <View>
-                  <ThemedText style={styles.toggleTitle}>Full Tank</ThemedText>
-                  <ThemedText style={styles.toggleSubtitle}>
-                    Used for consumption accuracy
-                  </ThemedText>
-                </View>
-              </View>
-              <Controller
-                control={form.control}
-                name="isFullTank"
-                render={({ field: { onChange, value } }) => (
-                  <Switch
-                    value={value}
-                    onValueChange={onChange}
-                    trackColor={{ false: "#767577", true: theme.primary }}
-                    thumbColor={"#f4f3f4"}
-                    ios_backgroundColor="#3e3e3e"
-                  />
-                )}
+            <View
+              style={[
+                styles.iconContainer,
+                { backgroundColor: "rgba(0, 108, 117, 0.1)" },
+              ]}
+            >
+              <MaterialIcons
+                name="calendar-today"
+                size={20}
+                color={theme.primary}
               />
             </View>
           </View>
-        </ScrollView>
+        </View>
+
+        {/* Odometer Input */}
+        <ControlledInput
+          control={form.control}
+          name="odometer"
+          label="Odometer Reading"
+          unit="km"
+          placeholder="0"
+          keyboardType="numeric"
+          returnKeyType="done"
+        />
+
+        {/* Volume and Price Row */}
+        <View style={styles.rowContainer}>
+          <ControlledInput
+            control={form.control}
+            name="liters"
+            label="Liters"
+            suffix="L"
+            placeholder="0.00"
+            keyboardType="decimal-pad"
+            returnKeyType="done"
+            containerStyle={styles.flex1}
+          />
+
+          <ControlledInput
+            control={form.control}
+            name="pricePerLiter"
+            label="Price/L"
+            suffix="$"
+            placeholder="0.00"
+            keyboardType="decimal-pad"
+            returnKeyType="done"
+            containerStyle={styles.flex1}
+          />
+        </View>
+
+        {/* Full Tank Toggle */}
+        <View
+          style={[
+            styles.inputCard,
+            {
+              backgroundColor: isDark ? theme.surface : theme.surface,
+              borderColor: theme.surfaceBorder,
+            },
+          ]}
+        >
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleLabelContainer}>
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: "rgba(255, 127, 17, 0.1)" },
+                ]}
+              >
+                <MaterialIcons
+                  name="ev-station"
+                  size={20}
+                  color={theme.accentOrange}
+                />
+              </View>
+              <View>
+                <ThemedText style={styles.toggleTitle}>Full Tank</ThemedText>
+                <ThemedText style={styles.toggleSubtitle}>
+                  Used for consumption accuracy
+                </ThemedText>
+              </View>
+            </View>
+            <Controller
+              control={form.control}
+              name="isFullTank"
+              render={({ field: { onChange, value } }) => (
+                <Switch
+                  value={value}
+                  onValueChange={onChange}
+                  trackColor={{ false: "#767577", true: theme.primary }}
+                  thumbColor={"#f4f3f4"}
+                  ios_backgroundColor="#3e3e3e"
+                />
+              )}
+            />
+          </View>
+        </View>
       </KeyboardAvoidingView>
 
       {/* Bottom Action Bar */}
@@ -270,34 +238,17 @@ export default function AddFuelEntryScreen() {
           <ThemedText style={styles.saveButtonText}>Save Entry</ThemedText>
         </Pressable>
       </View>
-    </View>
+    </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  backButton: {
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  backText: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginLeft: -4,
-  },
   bottomBar: {
     bottom: 0,
     left: 0,
     padding: 24,
     position: "absolute",
     right: 0,
-  },
-  cancelText: {
-    color: "#94a3b8",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  container: {
-    flex: 1,
   },
   currencySymbol: {
     fontSize: 24,
@@ -315,36 +266,7 @@ const styles = StyleSheet.create({
   flex1: {
     flex: 1,
   },
-  header: {
-    alignItems: "center",
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  headerDark: {
-    backgroundColor: "rgba(21, 30, 31, 0.95)",
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
-  },
-  headerLight: {
-    backgroundColor: "rgba(249, 250, 250, 0.95)",
-    borderBottomColor: "#e2e8f0",
-  },
-  headerSubtitle: {
-    color: "#94a3b8",
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 2,
-    textTransform: "uppercase",
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-  },
-  headerTitleContainer: {
-    alignItems: "center",
-  },
+
   iconContainer: {
     borderRadius: 8,
     padding: 8,
