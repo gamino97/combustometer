@@ -20,6 +20,7 @@ export const Colors = {
     accentOrange: "#FF7F11",
     surface: "#fff",
     surfaceBorder: "#e2e8f0", // slate-200
+    unselectButton: "#fafafa",
   },
   dark: {
     text: "#ECEDEE",
@@ -32,6 +33,7 @@ export const Colors = {
     accentOrange: "#FF7F11",
     surface: "#232E2F",
     surfaceBorder: "rgba(255, 255, 255, 0.05)",
+    unselectButton: "#27282C",
   },
 };
 

@@ -1,3 +1,4 @@
+import { ScreenLayout } from "@/components/screen-layout";
 import { ThemedText } from "@/components/themed-text";
 import { db } from "@/db";
 import { logs } from "@/db/schema";
@@ -7,7 +8,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { formatRelative } from "date-fns";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { router, useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import React, { useMemo } from "react";
 import {
   FlatList,
@@ -17,7 +17,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const numberFormat = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 0,
@@ -160,7 +159,7 @@ function VehicleCard({
 
 export default function HomeScreen(): React.ReactElement {
   const { theme, isDark } = useAppTheme();
-  const { vehicles: vehiclesData, addVehicle } = useVehicles();
+  const { vehicles: vehiclesData } = useVehicles();
   const { data: logsData } = useLiveQuery(db.select().from(logs));
   const processedVehicles = useMemo(() => {
     if (!vehiclesData) return [];
@@ -214,35 +213,34 @@ export default function HomeScreen(): React.ReactElement {
     </View>
   );
 
-  return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.background }]}
-      edges={["top", "left", "right"]}
-    >
-      <StatusBar style={isDark ? "light" : "dark"} />
-      <View
-        style={[styles.header, isDark ? styles.headerDark : styles.headerLight]}
+  /* New implementations */
+  const renderHeaderRight = (): React.ReactElement => (
+    <View style={styles.headerIcons}>
+      <TouchableOpacity
+        style={[
+          styles.iconButton,
+          isDark ? styles.iconButtonDark : styles.iconButtonLight,
+        ]}
       >
-        <ThemedText style={styles.headerTitle}>My Garage</ThemedText>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity
-            style={[
-              styles.iconButton,
-              isDark ? styles.iconButtonDark : styles.iconButtonLight,
-            ]}
-          >
-            <MaterialIcons name="search" size={20} color={theme.text} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.iconButton,
-              isDark ? styles.iconButtonDark : styles.iconButtonLight,
-            ]}
-          >
-            <MaterialIcons name="settings" size={20} color={theme.text} />
-          </TouchableOpacity>
-        </View>
-      </View>
+        <MaterialIcons name="search" size={20} color={theme.text} />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.iconButton,
+          isDark ? styles.iconButtonDark : styles.iconButtonLight,
+        ]}
+      >
+        <MaterialIcons name="settings" size={20} color={theme.text} />
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <ScreenLayout
+      title="My Garage"
+      rightAction={renderHeaderRight()}
+      style={styles.container}
+    >
       <FlatList
         data={processedVehicles}
         renderItem={({ item }) => (
@@ -260,12 +258,13 @@ export default function HomeScreen(): React.ReactElement {
       />
 
       <View style={styles.fabContainer}>
-        <TouchableOpacity
-          style={[
+        <Pressable
+          style={({ pressed }) => [
             styles.fab,
             {
               backgroundColor: theme.primary,
               shadowColor: theme.primary,
+              opacity: pressed ? 0.8 : 1,
             },
           ]}
           onPress={async () => {
@@ -273,9 +272,9 @@ export default function HomeScreen(): React.ReactElement {
           }}
         >
           <MaterialIcons name="add" size={32} color={theme.text} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
-    </SafeAreaView>
+    </ScreenLayout>
   );
 }
 
@@ -372,31 +371,11 @@ const styles = StyleSheet.create({
     right: 24,
     zIndex: 50,
   },
-  header: {
-    alignItems: "center",
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  headerDark: {
-    backgroundColor: "rgba(21, 30, 31, 0.95)",
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
-  },
   headerIcons: {
     flexDirection: "row",
     gap: 16,
   },
-  headerLight: {
-    backgroundColor: "rgba(249, 250, 250, 0.95)",
-    borderBottomColor: "#e2e8f0",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "800",
-    letterSpacing: -0.5,
-  },
+
   iconButton: {
     alignItems: "center",
     borderRadius: 20,
