@@ -9,6 +9,10 @@ export default function HomeLayout(): React.ReactElement {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="add-vehicle" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="[vehicleId]/history"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

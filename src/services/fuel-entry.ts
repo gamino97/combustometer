@@ -30,3 +30,17 @@ export const addFuelEntry = async (vehicleId: number, data: FuelEntryData) => {
     await updateVehicle(vehicleId, { distance: odometer, efficiency });
   });
 };
+
+export const getFuelEntries = async (vehicleId?: number) => {
+  const query = db.select().from(logs);
+
+  if (vehicleId) {
+    query.where(eq(logs.vehicleId, vehicleId));
+  }
+
+  // TODO: Add orderBy desc date once supported or manual sort
+  const results = await query;
+  return results.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+};

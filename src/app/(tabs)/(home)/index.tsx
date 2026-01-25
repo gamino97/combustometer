@@ -1,3 +1,4 @@
+import { FloatingButton } from "@/components/floating-button";
 import { ScreenLayout } from "@/components/screen-layout";
 import { ThemedText } from "@/components/themed-text";
 import { db } from "@/db";
@@ -149,6 +150,12 @@ function VehicleCard({
             isDark ? styles.arrowButtonDark : styles.arrowButtonLight,
             { opacity: pressed ? 0.7 : 1 },
           ]}
+          onPress={() =>
+            router.push({
+              pathname: "/(tabs)/(home)/[vehicleId]/history",
+              params: { vehicleId: item.id },
+            })
+          }
         >
           <MaterialIcons name="arrow-forward" size={20} color={textColor} />
         </Pressable>
@@ -256,24 +263,7 @@ export default function HomeScreen(): React.ReactElement {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
-
-      <View style={styles.fabContainer}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.fab,
-            {
-              backgroundColor: theme.primary,
-              shadowColor: theme.primary,
-              opacity: pressed ? 0.8 : 1,
-            },
-          ]}
-          onPress={async () => {
-            router.push("/add-vehicle");
-          }}
-        >
-          <MaterialIcons name="add" size={32} color={theme.text} />
-        </Pressable>
-      </View>
+      <FloatingButton onPress={() => router.push("/add-vehicle")} />
     </ScreenLayout>
   );
 }
@@ -353,23 +343,6 @@ const styles = StyleSheet.create({
   efficiencyValue: {
     fontSize: 24,
     fontWeight: "800",
-  },
-  fab: {
-    alignItems: "center",
-    borderRadius: 16,
-    elevation: 8,
-    height: 64,
-    justifyContent: "center",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    width: 64,
-  },
-  fabContainer: {
-    bottom: 24,
-    position: "absolute",
-    right: 24,
-    zIndex: 50,
   },
   headerIcons: {
     flexDirection: "row",
