@@ -82,12 +82,35 @@ export default function HistoryScreen() {
     </View>
   );
 
+  const renderEmpty = () => (
+    <View style={styles.emptyContainer}>
+      <View
+        style={[
+          styles.emptyIconContainer,
+          { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#f8fafc" },
+        ]}
+      >
+        <MaterialIcons
+          name="local-gas-station"
+          size={48}
+          color={isDark ? "rgba(255,255,255,0.2)" : "#cbd5e1"}
+        />
+      </View>
+      <ThemedText style={styles.emptyTitle}>No logs yet</ThemedText>
+      <ThemedText style={[styles.emptySubtitle, { color: theme.icon }]}>
+        Tap the plus button below to add your first refueling entry and start
+        tracking your fuel efficiency.
+      </ThemedText>
+    </View>
+  );
+
   return (
-    <ScreenLayout title="History" style={styles.container}>
+    <ScreenLayout title="History" style={styles.container} showBackButton>
       <FlatList
         data={logs}
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmpty}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
@@ -210,6 +233,30 @@ const styles = StyleSheet.create({
   dashboardContainer: {
     gap: 12,
     padding: 16,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 60,
+    paddingHorizontal: 40,
+  },
+  emptyIconContainer: {
+    alignItems: "center",
+    borderRadius: 32,
+    height: 100,
+    justifyContent: "center",
+    marginBottom: 20,
+    width: 100,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: "center",
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 8,
   },
   detailLabel: {
     fontSize: 10,
