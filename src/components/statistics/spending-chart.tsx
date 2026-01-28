@@ -1,11 +1,13 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
+import { BarChart } from "react-native-gifted-charts";
 
+import { Card } from "@/components/card";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { useAppTheme } from "@/hooks/use-app-theme";
 import { MonthlyData } from "@/hooks/use-insights-data";
-
+import { useThemeColor } from "@/hooks/use-theme-color";
+import { formatCurrency } from "@/utils/format";
 interface SpendingChartProps {
   data: MonthlyData[];
   totalSpent: number;
@@ -16,93 +18,61 @@ export function SpendingChart({
   totalSpent,
 }: SpendingChartProps): React.ReactElement {
   const primaryColor = useThemeColor({}, "primary");
-  const surfaceBorder = useThemeColor({}, "surfaceBorder");
-  const barInactive = useThemeColor(
-    { light: "#e2e8f0", dark: "rgba(255,255,255,0.1)" },
-    "background",
-  );
+  const textColor = useThemeColor({}, "text");
+  const { theme } = useAppTheme();
 
-  const maxValue = Math.max(...data.map((d) => d.value), 1);
+  const barData = data.map((item) => ({
+    value: item.value,
+    label: item.month,
+    frontColor: primaryColor,
+  }));
 
   return (
-    <ThemedView
-      style={[styles.container, { borderColor: surfaceBorder }]}
-      lightColor="#fff"
-    >
+    <Card>
       <View style={styles.header}>
         <ThemedText style={styles.title} type="defaultSemiBold">
           MONTHLY SPENDING
         </ThemedText>
         <ThemedText style={styles.total} lightColor={primaryColor}>
-          ${totalSpent.toFixed(2)} Total
+          {formatCurrency(totalSpent)} Total
         </ThemedText>
       </View>
-      <View style={styles.chartArea}>
-        {data.map((item, index) => (
-          <View key={index} style={styles.barGroup}>
-            <View style={styles.barContainer}>
-              <View
-                style={[
-                  styles.bar,
-                  {
-                    height: `${(item.value / maxValue) * 100}%`,
-                    backgroundColor: item.active ? primaryColor : barInactive,
-                  },
-                ]}
-              />
-            </View>
-            <ThemedText
-              style={[
-                styles.monthText,
-                item.active && { color: primaryColor, fontWeight: "bold" },
-              ]}
-            >
-              {item.month}
-            </ThemedText>
-          </View>
-        ))}
+      <View style={styles.chartWrapper}>
+        <BarChart
+          data={barData}
+          barWidth={32}
+          spacing={24}
+          initialSpacing={12}
+          height={120}
+          hideRules
+          yAxisThickness={0}
+          xAxisThickness={0}
+          barBorderRadius={6}
+          hideYAxisText
+          xAxisLabelTextStyle={{
+            color: textColor,
+            fontSize: 10,
+            opacity: 0.6,
+            marginTop: 4,
+          }}
+          disablePress
+        />
       </View>
-    </ThemedView>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  bar: {
-    borderRadius: 8,
-    width: "100%",
-  },
-  barContainer: {
-    height: "100%",
-    justifyContent: "flex-end",
-    width: "70%",
-  },
-  barGroup: {
+  chartWrapper: {
     alignItems: "center",
     flex: 1,
-    maxWidth: 60,
-  },
-  chartArea: {
-    alignItems: "flex-end",
-    flexDirection: "row",
-    height: 120,
-    justifyContent: "space-between",
-    paddingHorizontal: 8,
-  },
-  container: {
-    borderRadius: 24,
-    borderWidth: 1,
-    padding: 20,
+    justifyContent: "center",
   },
   header: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 24,
-  },
-  monthText: {
-    fontSize: 10,
-    marginTop: 12,
-    opacity: 0.6,
+    marginBottom: 16,
   },
   title: {
     fontSize: 10,
