@@ -42,11 +42,11 @@ export default function TabLayout(): React.ReactElement {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="insights"
         options={{
-          title: "Explore",
+          title: "Insights",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <IconSymbol size={28} name="chart.bar.fill" color={color} />
           ),
         }}
       />

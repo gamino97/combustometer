@@ -234,6 +234,16 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 16,
   },
+  detailLabel: {
+    fontSize: 10,
+    fontWeight: "600",
+    marginBottom: 4,
+    textTransform: "uppercase",
+  },
+  detailValue: {
+    fontSize: 20,
+    fontWeight: "700",
+  },
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -257,16 +267,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     marginBottom: 8,
-  },
-  detailLabel: {
-    fontSize: 10,
-    fontWeight: "600",
-    marginBottom: 4,
-    textTransform: "uppercase",
-  },
-  detailValue: {
-    fontSize: 20,
-    fontWeight: "700",
   },
   halfCard: {
     flex: 1,

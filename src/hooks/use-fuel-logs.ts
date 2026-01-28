@@ -16,16 +16,19 @@ export function useFuelLogs(vehicleId?: number) {
       .select(select)
       .from(logs)
       .where(vehicleId ? eq(logs.vehicleId, vehicleId) : undefined),
+    [vehicleId],
   );
   const { data: statsList } = useLiveQuery(
     db
       .select({
-        totalDistance: sql<number>`MAX(${logs.odometer}) - MIN(${logs.odometer})`,
-        avgConsumption: sql<number>`CAST((MAX(${logs.odometer}) - MIN(${logs.odometer})) / SUM(${logs.liters}) * 100 AS REAL)`,
-        totalSpent: sql<number>`SUM(${logs.liters} * ${logs.pricePerLiter})`,
+        totalDistance: sql<number>`COALESCE(MAX(${logs.odometer}) - MIN(${logs.odometer}), 0)`,
+        avgConsumption: sql<number>`CAST(COALESCE((MAX(${logs.odometer}) - MIN(${logs.odometer})) / SUM(${logs.liters}) * 100, 0) AS REAL)`,
+        totalSpent: sql<number>`COALESCE(SUM(${logs.liters} * ${logs.pricePerLiter}), 0)`,
+        totalVolume: sql<number>`COALESCE(SUM(${logs.liters}), 0)`,
       })
       .from(logs)
       .where(vehicleId ? eq(logs.vehicleId, vehicleId) : undefined),
+    [vehicleId],
   );
   const stats = statsList?.[0];
 
