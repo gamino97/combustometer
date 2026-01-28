@@ -47,7 +47,6 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
     borderWidth: 1,
-    minWidth: 140,
     padding: 20,
   },
   cardSecondaryDark: {

@@ -150,12 +150,7 @@ function VehicleCard({
             isDark ? styles.arrowButtonDark : styles.arrowButtonLight,
             { opacity: pressed ? 0.7 : 1 },
           ]}
-          onPress={() =>
-            router.push({
-              pathname: "/(tabs)/(home)/[vehicleId]/history",
-              params: { vehicleId: item.id },
-            })
-          }
+          onPress={() => router.push("/(tabs)/history")}
         >
           <MaterialIcons name="arrow-forward" size={20} color={textColor} />
         </Pressable>

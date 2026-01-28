@@ -1,36 +1,47 @@
+import { Card } from "@/components/card";
 import { FloatingButton } from "@/components/floating-button";
 import { ScreenLayout } from "@/components/screen-layout";
 import { ThemedText } from "@/components/themed-text";
+import { VehicleSelector } from "@/components/vehicle-selector";
 import { useAppTheme } from "@/hooks/use-app-theme";
 import { useFuelLogs } from "@/hooks/use-fuel-logs";
+import { useVehicles } from "@/hooks/use-vehicles";
 import { formatCurrency, formatNumber } from "@/utils/format";
 import { MaterialIcons } from "@expo/vector-icons";
 import { format } from "date-fns";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
+import { useRouter } from "expo-router";
+import { useMemo, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 
 export default function HistoryScreen() {
   const { theme, isDark } = useAppTheme();
-  const { vehicleId } = useLocalSearchParams<{ vehicleId?: string }>();
-  const parsedVehicleId = vehicleId ? parseInt(vehicleId, 10) : undefined;
-  const { logs, stats, isLoading } = useFuelLogs(parsedVehicleId);
+  const { vehicles } = useVehicles();
+  const [selectedVehicleId, setSelectedVehicleId] = useState<
+    number | undefined
+  >(undefined);
   const router = useRouter();
 
-  if (isLoading || !parsedVehicleId) return null;
+  const selectedVehicle = useMemo(
+    () =>
+      vehicles.find((v) => v.id === (selectedVehicleId ?? vehicles[0]?.id)) ||
+      vehicles[0],
+    [vehicles, selectedVehicleId],
+  );
+
+  const effectiveId = selectedVehicle?.id;
+  const { logs, stats, isLoading } = useFuelLogs(effectiveId);
+
+  if (isLoading || !effectiveId) return null;
 
   const renderHeader = () => (
     <View style={styles.dashboardContainer}>
-      <View
-        style={[
-          styles.card,
-          styles.summaryCard,
-          {
-            backgroundColor: "rgba(13, 223, 242, 0.1)",
-            borderColor: "rgba(13, 223, 242, 0.2)",
-          },
-        ]}
-      >
+      <VehicleSelector
+        vehicles={vehicles}
+        selectedVehicleId={selectedVehicleId}
+        onSelect={setSelectedVehicleId}
+      />
+
+      <Card style={[styles.card, styles.summaryCard]}>
         <View style={styles.cardHeader}>
           <MaterialIcons name="speed" size={16} color={theme.primary} />
           <ThemedText style={[styles.cardLabel, { color: theme.text }]}>
@@ -41,16 +52,10 @@ export default function HistoryScreen() {
           {formatNumber(stats.totalDistance)}
           <ThemedText style={styles.unitText}> km</ThemedText>
         </ThemedText>
-      </View>
+      </Card>
 
       <View style={styles.statsRow}>
-        <View
-          style={[
-            styles.card,
-            styles.halfCard,
-            isDark ? styles.cardDark : styles.cardLight,
-          ]}
-        >
+        <Card style={[styles.card, styles.halfCard]}>
           <ThemedText style={[styles.cardLabel, { color: theme.icon }]}>
             AVG. CONSUMPTION
           </ThemedText>
@@ -58,22 +63,16 @@ export default function HistoryScreen() {
             {formatNumber(stats.avgConsumption)}
             <ThemedText style={styles.unitTextSmall}> L/100km</ThemedText>
           </ThemedText>
-        </View>
+        </Card>
 
-        <View
-          style={[
-            styles.card,
-            styles.halfCard,
-            isDark ? styles.cardDark : styles.cardLight,
-          ]}
-        >
+        <Card style={[styles.card, styles.halfCard]}>
           <ThemedText style={[styles.cardLabel, { color: theme.icon }]}>
             TOTAL SPENT
           </ThemedText>
           <ThemedText style={[styles.cardValueSmall, { color: theme.primary }]}>
             {formatCurrency(stats.totalSpent)}
           </ThemedText>
-        </View>
+        </Card>
       </View>
 
       <View style={styles.sectionHeader}>
@@ -105,7 +104,7 @@ export default function HistoryScreen() {
   );
 
   return (
-    <ScreenLayout title="History" style={styles.container} showBackButton>
+    <ScreenLayout title="History">
       <FlatList
         data={logs}
         keyExtractor={(item) => item.id.toString()}
@@ -114,12 +113,7 @@ export default function HistoryScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
-          <View
-            style={[
-              styles.logCard,
-              isDark ? styles.cardDark : styles.cardLight,
-            ]}
-          >
+          <Card style={styles.logCard}>
             <View style={styles.logHeader}>
               <View>
                 <ThemedText style={styles.logDate}>
@@ -165,14 +159,14 @@ export default function HistoryScreen() {
                 </ThemedText>
               </View>
             </View>
-          </View>
+          </Card>
         )}
       />
       <FloatingButton
         onPress={() => {
           router.push({
             pathname: "/add-fuel-entry/[vehicleId]",
-            params: { vehicleId: parsedVehicleId },
+            params: { vehicleId: effectiveId },
           });
         }}
       />
@@ -200,10 +194,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 20,
   },
-  cardDark: {
-    backgroundColor: "#183234",
-    borderColor: "rgba(255, 255, 255, 0.05)",
-  },
   cardHeader: {
     alignItems: "center",
     flexDirection: "row",
@@ -215,10 +205,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: "uppercase",
   },
-  cardLight: {
-    backgroundColor: "#f1f5f9",
-    borderColor: "#e2e8f0",
-  },
   cardValue: {
     fontSize: 30,
     fontWeight: "800",
@@ -226,9 +212,6 @@ const styles = StyleSheet.create({
   cardValueSmall: {
     fontSize: 20,
     fontWeight: "800",
-  },
-  container: {
-    flex: 1,
   },
   dashboardContainer: {
     gap: 12,
@@ -276,8 +259,6 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   logCard: {
-    borderRadius: 12,
-    borderWidth: 1,
     gap: 16,
     marginBottom: 12,
     marginHorizontal: 16,
