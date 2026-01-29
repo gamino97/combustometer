@@ -1,10 +1,9 @@
+import { Card } from "@/components/card";
+import { ThemedText } from "@/components/themed-text";
+import { IconSymbol, IconSymbolName } from "@/components/ui/icon-symbol";
+import { useThemeColor } from "@/hooks/use-theme-color";
 import React from "react";
 import { StyleSheet, View } from "react-native";
-
-import { IconSymbol, IconSymbolName } from "@/components/ui/icon-symbol";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { useThemeColor } from "@/hooks/use-theme-color";
 
 interface StatGridItemProps {
   label: string;
@@ -26,10 +25,7 @@ export function StatGridItem({
   );
 
   return (
-    <ThemedView
-      style={[styles.container, { borderColor: borderSubtle }]}
-      lightColor="#fff"
-    >
+    <Card style={[styles.container, { borderColor: borderSubtle }]}>
       <View style={styles.header}>
         <IconSymbol size={18} name={icon} color={iconColor} />
         <ThemedText style={styles.label} type="defaultSemiBold">
@@ -39,7 +35,7 @@ export function StatGridItem({
       <ThemedText style={styles.value} type="subtitle">
         {value} <ThemedText style={styles.unit}>{unit}</ThemedText>
       </ThemedText>
-    </ThemedView>
+    </Card>
   );
 }
 

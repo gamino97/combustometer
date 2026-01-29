@@ -1,6 +1,6 @@
+import { FloatingButton } from "@/components/floating-button";
 import { ScreenLayout } from "@/components/screen-layout";
 import { EfficiencyHero } from "@/components/statistics/efficiency-hero";
-import { QuickLogAction } from "@/components/statistics/quick-log-action";
 import { SpendingChart } from "@/components/statistics/spending-chart";
 import { StatGridItem } from "@/components/statistics/stat-grid-item";
 import { TrendChart } from "@/components/statistics/trend-chart";
@@ -8,6 +8,7 @@ import { VehicleSelector } from "@/components/vehicle-selector";
 import { useInsightsData } from "@/hooks/use-insights-data";
 import { useVehicles } from "@/hooks/use-vehicles";
 import { formatNumber } from "@/utils/format";
+import { useRouter } from "expo-router";
 import { ReactElement, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -16,6 +17,7 @@ export default function InsightsScreen(): ReactElement {
   const [selectedVehicleId, setSelectedVehicleId] = useState<
     number | undefined
   >(undefined);
+  const router = useRouter();
 
   const selectedVehicle = useMemo(
     () =>
@@ -38,7 +40,12 @@ export default function InsightsScreen(): ReactElement {
   } = useInsightsData(effectiveId);
 
   return (
-    <ScreenLayout title="Statistics & Insights" style={styles.content}>
+    <ScreenLayout
+      title="Statistics & Insights"
+      scrollable
+      contentContainerStyle={styles.content}
+      style={styles.layout}
+    >
       <VehicleSelector
         vehicles={vehicles}
         selectedVehicleId={selectedVehicleId}
@@ -68,11 +75,16 @@ export default function InsightsScreen(): ReactElement {
             />
           </View>
 
-          <QuickLogAction />
+          <FloatingButton
+            onPress={() =>
+              router.push({
+                pathname: "/add-fuel-entry/[vehicleId]",
+                params: { vehicleId: selectedVehicle?.id },
+              })
+            }
+          />
         </>
       )}
-
-      <View style={styles.spacer} />
     </ScreenLayout>
   );
 }
@@ -82,9 +94,7 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 16,
   },
-  spacer: {
-    height: 40,
-  },
+  layout: {},
   statsGrid: {
     flexDirection: "row",
     gap: 16,

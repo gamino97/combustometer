@@ -291,8 +291,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     elevation: 2,
-    marginBottom: 20,
-    marginHorizontal: 24,
+    marginBottom: 12,
+    marginHorizontal: 16,
     overflow: "hidden",
     padding: 20,
     shadowColor: "#000",
@@ -343,7 +343,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 16,
   },
-
   iconButton: {
     alignItems: "center",
     borderRadius: 20,
@@ -423,7 +422,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   statsScroll: {
-    paddingLeft: 24,
+    paddingLeft: 16,
   },
   statsScrollContent: {
     gap: 16,

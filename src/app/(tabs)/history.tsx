@@ -104,7 +104,7 @@ export default function HistoryScreen() {
   );
 
   return (
-    <ScreenLayout title="History">
+    <ScreenLayout title="History" style={styles.content}>
       <FlatList
         data={logs}
         keyExtractor={(item) => item.id.toString()}
@@ -212,6 +212,9 @@ const styles = StyleSheet.create({
   cardValueSmall: {
     fontSize: 20,
     fontWeight: "800",
+  },
+  content: {
+    flex: 1,
   },
   dashboardContainer: {
     gap: 12,

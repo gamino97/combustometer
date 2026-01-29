@@ -1,13 +1,11 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
-import { BarChart } from "react-native-gifted-charts";
-
 import { Card } from "@/components/card";
 import { ThemedText } from "@/components/themed-text";
-import { useAppTheme } from "@/hooks/use-app-theme";
 import { MonthlyData } from "@/hooks/use-insights-data";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { formatCurrency } from "@/utils/format";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import { BarChart } from "react-native-gifted-charts";
 interface SpendingChartProps {
   data: MonthlyData[];
   totalSpent: number;
@@ -19,14 +17,11 @@ export function SpendingChart({
 }: SpendingChartProps): React.ReactElement {
   const primaryColor = useThemeColor({}, "primary");
   const textColor = useThemeColor({}, "text");
-  const { theme } = useAppTheme();
-
   const barData = data.map((item) => ({
     value: item.value,
     label: item.month,
     frontColor: primaryColor,
   }));
-
   return (
     <Card>
       <View style={styles.header}>
@@ -65,7 +60,6 @@ export function SpendingChart({
 const styles = StyleSheet.create({
   chartWrapper: {
     alignItems: "center",
-    flex: 1,
     justifyContent: "center",
   },
   header: {

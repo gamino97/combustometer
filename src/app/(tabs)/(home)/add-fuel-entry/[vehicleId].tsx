@@ -1,7 +1,9 @@
+import { Card } from "@/components/card";
 import { ControlledInput } from "@/components/controlled-input";
 import { ScreenLayout } from "@/components/screen-layout";
 import { ThemedText } from "@/components/themed-text";
 import { Colors } from "@/constants/theme";
+import { useAppTheme } from "@/hooks/use-app-theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAddFuelEntry } from "@/hooks/use-fuel-entry";
 import { FuelEntryData } from "@/schemas/fuel-entry";
@@ -27,26 +29,15 @@ function NoVehicle() {
 }
 
 function SummaryCard({ control }: { control: Control<FuelEntryData> }) {
-  const isDark = useColorScheme() === "dark";
-  const theme = Colors[isDark ? "dark" : "light"];
   const liters = useWatch({ control, name: "liters" });
   const pricePerLiter = useWatch({ control, name: "pricePerLiter" });
   const totalCost = (
     (Number(liters) || 0) * (Number(pricePerLiter) || 0)
   ).toFixed(2);
+  const { theme } = useAppTheme();
 
   return (
-    <View
-      style={[
-        styles.summaryCard,
-        {
-          backgroundColor: isDark
-            ? "rgba(0, 108, 117, 0.2)"
-            : "rgba(0, 108, 117, 0.1)",
-          borderColor: "rgba(0, 108, 117, 0.2)",
-        },
-      ]}
-    >
+    <Card style={[styles.summaryCard]} variant="primary">
       <View style={styles.summaryIconBg}>
         <MaterialIcons
           name="payments"
@@ -66,7 +57,7 @@ function SummaryCard({ control }: { control: Control<FuelEntryData> }) {
           {totalCost}
         </ThemedText>
       </View>
-    </View>
+    </Card>
   );
 }
 
