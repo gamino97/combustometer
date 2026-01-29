@@ -1,50 +1,75 @@
-# Welcome to your Expo app 👋
+# Combustometer ⛽�
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Combustometer is a modern, cross-platform mobile application built with Expo and React Native, designed to help vehicle owners track fuel consumption, calculate efficiency, and monitor performance insights over time.
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+- **Garage Management**: Add and manage multiple vehicles with details like name, fuel type, and initial odometer readings.
+- **Fuel Logging**: Easily record fuel entries including liters, price, odometer reading, and whether it was a full tank.
+- **Efficiency Tracking**: Automatically calculates vehicle efficiency (km/L) and tracks performance trends.
+- **Insights & Analytics**: Visual charts and statistics to monitor fuel consumption and spending habits.
+- **Historical Data**: Comprehensive history of all fuel entries organized by vehicle.
+- **Local Persistence**: Fast and reliable data storage using SQLite and Drizzle ORM.
 
-   ```bash
-   npm install
-   ```
+## 🚀 Tech Stack
 
-2. Start the app
+- **Framework**: [Expo](https://expo.dev/) (Managed Workflow)
+- **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) (File-based routing)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Database**: [SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) with [Drizzle ORM](https://orm.drizzle.team/)
+- **Forms & Validation**: [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/)
+- **UI Components**: Native-optimized components with [Expo Symbols](https://docs.expo.dev/versions/latest/sdk/symbols/) and [Linear Gradient](https://docs.expo.dev/versions/latest/sdk/linear-gradient/)
+- **Charts**: [react-native-gifted-charts](https://github.com/Abhinav-Karkare/react-native-gifted-charts)
 
-   ```bash
-   npx expo start
-   ```
+## 🛠️ Getting Started
 
-In the output, you'll find options to open the app in a
+### Prerequisites
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- [Node.js](https://nodejs.org/) (LTS)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [Expo Go](https://expo.dev/go) app on your mobile device or an emulator/simulator
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Installation
 
-## Get a fresh project
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/gamino97/combustometer.git
+    cd combustometer
+    ```
 
-When you're ready, run:
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-```bash
-npm run reset-project
+3.  **Start the development server**:
+    ```bash
+    npx expo start
+    ```
+
+### Running the App
+
+- Scan the QR code with **Expo Go** (Android) or the **Camera app** (iOS).
+- Press `a` for Android Emulator.
+- Press `i` for iOS Simulator.
+
+## 📂 Project Structure
+
+```text
+├── src
+│   ├── app             # Expo Router pages and layouts
+│   ├── components      # Reusable UI components
+│   ├── db              # Drizzle & SQLite configuration
+│   │   ├── schema      # Database table definitions
+│   ├── hooks           # Custom React hooks (business logic & data fetching)
+│   ├── services        # Core business logic and calculations
+│   ├── utils           # Helper functions and formatting
+│   └── schemas         # Zod validation schemas
+├── drizzle             # Generated migrations
+└── assets              # Static assets (images, fonts)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 📜 License
 
-## Learn more
+Created by **gamino**. Distributed under the MIT License.
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
